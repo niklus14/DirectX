@@ -23,5 +23,3 @@ http://localhost:5173/
 - AZCON Pass concept mock.
 - OpenRouteService route integration through the local server.
 - Groq intent extraction through the local server.
-
-The browser does not read `apikeys` directly. `server.js` reads that file and blocks it from static access.
