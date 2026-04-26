@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DirectX Traffic Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="./dashboard.css">
+  </head>
+  <body>
+    <section id="landing-view" class="landing-glass">
+      <div class="landing-content">
+        <h1 class="landing-title">AZCON ONE</h1>
+        <p class="landing-subtitle">Smart Mobility Assistant</p>
+        
+        <div class="landing-widgets">
+          <div class="widget">
+            <span class="widget-icon">🌡️</span>
+            <div class="widget-data">
+              <strong id="landing-temp">--°C</strong>
+              <span>Baku</span>
+            </div>
+          </div>
+          <div class="widget">
+            <span class="widget-icon">💵</span>
+            <div class="widget-data">
+              <strong id="landing-usd">--</strong>
+              <span>USD/AZN</span>
+            </div>
+          </div>
+          <div class="widget">
+            <span class="widget-icon">💶</span>
+            <div class="widget-data">
+              <strong id="landing-eur">--</strong>
+              <span>EUR/AZN</span>
+            </div>
+          </div>
+        </div>
+
+        <button id="start-journey" class="landing-btn">Explore Routes</button>
+      </div>
+    </section>
+
+    <main class="dashboard-shell" id="dashboard-view" style="display: none;">
+      <header class="app-header">
+        <div class="brand-lockup">
+          <span class="brand-mark">DX</span>
+          <div>
+            <strong>DirectX</strong>
+            <span>Real-time route intelligence</span>
+          </div>
+        </div>
+        <div class="status-strip">
+          <span id="api-status">Checking APIs</span>
+          <span id="traffic-source">Traffic source pending</span>
+        </div>
+      </header>
+
+      <section class="traffic-hero">
+        <div class="intro-panel reveal">
+          <p class="eyebrow">Traffic command center</p>
+          <h1>Choose a route by seeing congestion, not just time.</h1>
+          <p class="lead">
+            Enter where you are and where you need to go. DirectX compares available
+            routes, visualizes traffic weight, and asks AI to summarize the best move.
+          </p>
+          <div class="traffic-legend" aria-label="Traffic legend">
+            <span><i class="free"></i> Free</span>
+            <span><i class="medium"></i> Moderate</span>
+            <span><i class="heavy"></i> Heavy</span>
+          </div>
+        </div>
+
+        <div class="command-panel reveal delay-1">
+          <div class="panel-title">
+            <span>Route request</span>
+            <strong id="assistant-state">Waiting</strong>
+          </div>
+          <textarea id="assistant-input" rows="4" spellcheck="false" placeholder="Write your need here, or use the fields below."></textarea>
+          <div class="field-stack">
+            <label>
+              From
+              <input id="origin" autocomplete="off" placeholder="Holberton School Baku">
+            </label>
+            <label>
+              To
+              <input id="destination" autocomplete="off" placeholder="UNEC Nizami korpusu">
+            </label>
+            <button class="primary" id="run-assistant">Analyze traffic</button>
+            <button class="ghost" id="sample-route" type="button">Fill Holberton sample</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="module-grid" aria-label="DirectX capabilities">
+        <article class="module-card active reveal delay-1">
+          <span class="module-index">01</span>
+          <h2>Live traffic weight</h2>
+          <p>Compares normal route time with traffic-aware time when Google traffic is configured.</p>
+          <strong id="traffic-weight-signal">Awaiting route</strong>
+        </article>
+        <article class="module-card reveal delay-2">
+          <span class="module-index">02</span>
+          <h2>Visual route map</h2>
+          <p>Draws available paths, origin/destination markers, and a trip diameter overlay.</p>
+          <strong id="route-signal">No route yet</strong>
+        </article>
+        <article class="module-card reveal delay-3">
+          <span class="module-index">03</span>
+          <h2>Best route pick</h2>
+          <p>Ranks options by total duration and congestion pressure.</p>
+          <strong id="best-route-signal">Waiting</strong>
+        </article>
+        <article class="module-card reveal delay-4">
+          <span class="module-index">04</span>
+          <h2>AI recommendation</h2>
+          <p>Groq summarizes the traffic situation in plain Azerbaijani.</p>
+          <strong id="ai-signal">Ready</strong>
+        </article>
+        <article class="module-card reveal delay-5">
+          <span class="module-index">05</span>
+          <h2>Next modules</h2>
+          <p>Airport, rail and travel services can be added after the traffic core is stable.</p>
+          <strong>Stage 1 focused</strong>
+        </article>
+      </section>
+
+      <section class="traffic-workbench">
+        <section class="map-board reveal delay-2">
+          <div class="panel-title">
+            <span>Route visual</span>
+            <strong id="map-state">No route drawn</strong>
+          </div>
+          <div class="route-canvas">
+            <div id="map" style="width: 100%; height: 100%;" aria-label="Traffic route visualization"></div>
+          </div>
+        </section>
+
+        <section class="journey-board reveal delay-3" aria-live="polite">
+          <div class="journey-head">
+            <div>
+              <p class="eyebrow">Traffic result</p>
+              <h2 id="result-title">Enter a route to start</h2>
+            </div>
+            <span id="status-label">Ready</span>
+          </div>
+          <div class="metrics" id="metrics"></div>
+          <div class="address-resolution" id="address-resolution"></div>
+          <div class="route-list" id="route-list"></div>
+          <div class="ai-summary" id="ai-summary">
+            Traffic recommendation will appear here after analysis.
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="./app-traffic.js"></script>
+  </body>
+</html>
