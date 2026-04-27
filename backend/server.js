@@ -1,9 +1,12 @@
 const express = require('express');
 const cors    = require('cors');
 const path    = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const flightsRouter = require('./routes/flights');
+const aiRouter = require('./routes/ai');
+const weatherRouter = require('./routes/weather');
+const currencyRouter = require('./routes/currency');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +21,9 @@ app.use(express.static(path.join(__dirname, '..')));
 
 // ── API Routes ───────────────────────────────────────────
 app.use('/api/flights', flightsRouter);
+app.use('/api/ai', aiRouter);
+app.use('/api/weather', weatherRouter);
+app.use('/api/currency', currencyRouter);
 
 // ── Health Check ─────────────────────────────────────────
 app.get('/api/health', (req, res) => {
