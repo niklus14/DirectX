@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DirectX · AZCON Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN SYSTEM — DirectX · Light Sky Blue
+═══════════════════════════════════════════ */
+:root {
+  --sky:       #C8E6F5;
+  --sky-mid:   #A8D4EC;
+  --sky-deep:  #7BB8E0;
+  --sky-line:  #5A9FD4;
+  --ink:       #0D2136;
+  --ink-2:     #1E3A55;
+  --ink-3:     #2E5070;
+  --mist:      rgba(255,255,255,0.55);
+  --mist-2:    rgba(255,255,255,0.25);
+  --accent:    #0066CC;
+  --accent-2:  #FF6B2B;
+  --gold:      #F0B429;
+  --white:     #FFFFFF;
+  --font-disp: 'Bebas Neue', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--sky);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════════
+   PLANE INTRO OVERLAY
+═══════════════════════════════════════════ */
+#plane-intro {
+  position: fixed; inset: 0; z-index: 9999;
+  pointer-events: none;
+  display: flex; align-items: center;
+}
+
+.plane-svg {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translate3d(-100vw, -50%, 0);
+  width: 900px;
+  max-width: 80vw;
+  animation: planefly 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s forwards;
+  filter: drop-shadow(0 20px 40px rgba(13, 33, 79, 0.5));
+  will-change: transform;
+}
+
+@keyframes planefly {
+  0%   { transform: translate3d(-100vw, -50%, 0); opacity: 0; }
+  10%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translate3d(120vw, -50%, 0); opacity: 0; }
+}
+
+/* Contrail */
+.contrail {
+  position: absolute;
+  top: 50%;
+  left: 0; right: 0;
+  height: 4px;
+  transform: translate3d(0, -2px, 0);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9) 20%, rgba(255,255,255,0.5) 60%, transparent);
+  opacity: 0;
+  animation: contrailshow 4s ease 0.2s forwards;
+  will-change: opacity, clip-path;
+}
+@keyframes contrailshow {
+  0%   { opacity: 0; clip-path: inset(0 100% 0 0); }
+  15%  { opacity: 1; }
+  50%  { clip-path: inset(0 50% 0 0); }
+  85%  { opacity: 0.8; clip-path: inset(0 0% 0 0); }
+  100% { opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 48px;
+  background: rgba(200,230,245,0.7);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.5);
+}
+
+.nav-logo {
+  font-family: var(--font-disp);
+  font-size: 32px; letter-spacing: 0.06em;
+  color: var(--ink);
+  line-height: 1;
+}
+.nav-logo span { color: var(--accent); }
+
+.nav-links {
+  display: flex; align-items: center; gap: 32px;
+  font-size: 13px; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+
+.nav-cta {
+  background: var(--ink);
+  color: var(--white);
+  padding: 10px 22px; border-radius: 4px;
+  font-size: 12px; font-weight: 500; letter-spacing: 0.1em;
+  text-transform: uppercase; cursor: pointer;
+  border: none; font-family: var(--font-body);
+  transition: background 0.2s;
+}
+.nav-cta:hover { background: var(--accent); }
+
+/* ═══════════════════════════════════════════
+   HERO SECTION
+═══════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  position: relative;
+  padding-top: 80px;
+  overflow: hidden;
+}
+
+/* Subtle sky gradient layers */
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(255,255,255,0.6) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 100%, rgba(91,159,212,0.3) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* Cloud decorations */
+.cloud {
+  position: absolute;
+  background: rgba(255,255,255,0.6);
+  border-radius: 50px;
+  filter: blur(2px);
+  animation: clouddrift linear infinite;
+}
+.cloud::before, .cloud::after {
+  content: '';
+  position: absolute;
+  background: rgba(255,255,255,0.6);
+  border-radius: 50%;
+}
+.cloud-1 { width: 160px; height: 40px; top: 20%; left: -180px; animation-duration: 28s; animation-delay: 0s; }
+.cloud-1::before { width: 60px; height: 60px; top: -24px; left: 20px; }
+.cloud-1::after  { width: 40px; height: 40px; top: -14px; left: 70px; }
+.cloud-2 { width: 120px; height: 32px; top: 40%; left: -140px; animation-duration: 36s; animation-delay: -14s; opacity: 0.7; }
+.cloud-2::before { width: 50px; height: 50px; top: -20px; left: 15px; }
+.cloud-2::after  { width: 35px; height: 35px; top: -12px; left: 55px; }
+.cloud-3 { width: 200px; height: 50px; top: 65%; left: -220px; animation-duration: 44s; animation-delay: -6s; opacity: 0.5; }
+.cloud-3::before { width: 80px; height: 80px; top: -32px; left: 28px; }
+.cloud-3::after  { width: 55px; height: 55px; top: -18px; left: 90px; }
+
+@keyframes clouddrift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(100vw + 250px)); }
+}
+
+.hero-content {
+  position: relative; z-index: 2;
+  text-align: center;
+  animation: heroin 0.8s ease 2.4s both;
+}
+@keyframes heroin {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.24em; color: var(--accent);
+  text-transform: uppercase; margin-bottom: 16px;
+}
+
+.hero-title {
+  font-family: var(--font-disp);
+  font-size: clamp(80px, 12vw, 160px);
+  line-height: 0.92;
+  color: var(--ink);
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+}
+.hero-title .hl { color: var(--accent); }
+
+.hero-tagline {
+  font-family: var(--font-disp);
+  font-size: clamp(28px, 4vw, 52px);
+  color: var(--ink-3); letter-spacing: 0.16em;
+  margin-bottom: 28px;
+}
+
+.hero-sub {
+  font-size: 16px; color: var(--ink-3); font-weight: 300;
+  max-width: 480px; margin: 0 auto 40px;
+  line-height: 1.7;
+}
+
+/* ── STAT BAR ── */
+.stat-bar {
+  display: flex; align-items: center; gap: 0;
+  background: var(--mist);
+  border: 1px solid rgba(255,255,255,0.7);
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+  margin-bottom: 48px;
+}
+
+.stat-item {
+  padding: 14px 28px;
+  border-right: 1px solid rgba(255,255,255,0.5);
+  text-align: center;
+}
+.stat-item:last-child { border-right: none; }
+.stat-num {
+  font-family: var(--font-disp);
+  font-size: 28px; color: var(--ink);
+  line-height: 1;
+}
+.stat-lbl {
+  font-size: 10px; color: var(--ink-3);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.scroll-hint {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.18em; color: var(--ink-3);
+  text-transform: uppercase; animation: bounce 2s ease-in-out infinite;
+  margin-top: 24px;
+}
+.scroll-arrow {
+  width: 1px; height: 48px;
+  background: linear-gradient(to bottom, var(--accent), transparent);
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(6px); }
+}
+
+/* ═══════════════════════════════════════════
+   METRO SCROLL SECTION
+═══════════════════════════════════════════ */
+.metro-section {
+  position: relative;
+  /* 5 features × 100vh each */
+  height: 500vh;
+}
+
+/* sticky stage — stays in view while we scroll through 500vh */
+.metro-stage {
+  position: sticky; top: 0;
+  height: 100vh;
+  background: linear-gradient(180deg, #B8DCF0 0%, #C8E6F5 40%, #D8EFF8 100%);
+  perspective: 1400px;
+  transform-style: preserve-3d;
+}
+
+/* ── PANELS (3D Carousel) ── */
+.feature-panel {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 460px; min-height: 320px;
+  margin-top: -160px; margin-left: -230px;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 28px;
+  padding: 44px;
+  box-shadow: 0 20px 50px rgba(0, 102, 204, 0.12), inset 0 0 20px rgba(255,255,255,0.8);
+  display: flex; flex-direction: column; justify-content: center;
+  will-change: transform, opacity;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.feat-num {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.22em;
+  color: var(--accent); margin-bottom: 16px;
+  text-transform: uppercase;
+}
+.feat-title {
+  font-family: var(--font-disp);
+  font-size: clamp(32px, 4vw, 54px);
+  line-height: 1.05; color: var(--ink);
+  margin-bottom: 20px; letter-spacing: 0.04em;
+}
+.feat-body {
+  font-size: 16px; line-height: 1.75;
+  color: var(--ink-2); font-weight: 300;
+  max-width: 340px;
+}
+.feat-tag {
+  display: inline-block; margin-top: 20px;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  padding: 6px 14px; border-radius: 3px;
+  border: 1px solid;
+}
+.tag-blue   { border-color: var(--accent);  color: var(--accent); }
+.tag-orange { border-color: var(--accent-2); color: var(--accent-2); }
+.tag-gold   { border-color: var(--gold);     color: #c68a00; }
+
+/* ── METRO RAIL (center) ── */
+.metro-rail {
+  position: absolute;
+  left: 50%; transform: translateX(-50%) translateZ(0);
+  top: 0; bottom: 0;
+  width: 120px;
+  display: flex; flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+
+/* Rail tracks */
+.rail-left, .rail-right {
+  position: absolute;
+  top: 0; bottom: 0; width: 6px;
+  background: linear-gradient(to right, #444 0%, #999 30%, #FFF 50%, #777 70%, #222 100%);
+  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+  border-radius: 1px;
+}
+.rail-left  { left: 38px; }
+.rail-right { right: 38px; }
+
+/* Rail ties (cross-bars) */
+.rail-ties {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+}
+.ties-inner {
+  position: absolute;
+  left: 20px; right: 20px;
+  top: 0;
+}
+.tie {
+  height: 6px; 
+  background: linear-gradient(to bottom, #555, #222);
+  border-radius: 2px; 
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+}
+
+/* Station dots */
+.station-dot {
+  position: absolute;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #FFF;
+  border: 3px solid #7B1FA2;
+  left: 50%; transform: translateX(-50%);
+  z-index: 5;
+  transition: transform 0.3s ease, background 0.3s ease;
+  box-shadow: 0 0 0 0 rgba(123, 31, 162, 0.4);
+}
+.station-dot.active {
+  background: #7B1FA2;
+  transform: translateX(-50%) scale(1.5);
+  box-shadow: 0 0 0 8px rgba(123, 31, 162, 0.2);
+}
+.station-dot:nth-child(1) { top: 15%; }
+.station-dot:nth-child(2) { top: 30%; }
+.station-dot:nth-child(3) { top: 47%; }
+.station-dot:nth-child(4) { top: 63%; }
+.station-dot:nth-child(5) { top: 80%; }
+
+/* ── METRO TRAIN (the moving element) ── */
+.metro-train-wrap {
+  position: absolute;
+  left: 50%; transform: translateX(-50%);
+  width: 72px;
+  animation: trainloop 12s linear infinite;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.5));
+}
+@keyframes trainloop {
+  0%   { top: -700px; }
+  100% { top: calc(100vh + 200px); }
+}
+
+/* SVG train car */
+.train-car {
+  width: 72px;
+  height: 160px;
+}
+.train-connection {
+  width: 44px;
+  height: 6px;
+  background: repeating-linear-gradient(to bottom, #111, #111 2px, #333 2px, #333 4px);
+  margin: 0 auto;
+}
+
+/* Glow beneath train */
+.train-glow {
+  position: absolute;
+  width: 120px; height: 100%;
+  top: 0; left: 50%; transform: translateX(-50%);
+  background: rgba(123, 31, 162, 0.35);
+  filter: blur(24px);
+  z-index: -1;
+}
+
+/* ── CHAPTER PROGRESS ── */
+.chapter-label {
+  position: absolute; bottom: 36px; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.2em; color: var(--ink-3);
+  text-transform: uppercase; z-index: 20;
+  white-space: nowrap;
+  transition: opacity 0.4s;
+}
+
+/* ═══════════════════════════════════════════
+   FEATURE ICON BADGES
+═══════════════════════════════════════════ */
+.feat-icon {
+  width: 52px; height: 52px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+  transition: transform 0.4s ease;
+}
+.feat-icon svg { width: 26px; height: 26px; }
+.fi-blue   { background: rgba(0,102,204,0.1); }
+.fi-orange { background: rgba(255,107,43,0.1); }
+.fi-gold   { background: rgba(240,180,41,0.12); }
+.fi-green  { background: rgba(16,185,129,0.1); }
+.fi-purple { background: rgba(139,92,246,0.1); }
+
+.feature-panel.active .feat-icon {
+  animation: iconpop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;
+}
+@keyframes iconpop {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════
+   SCROLL SPACERS (invisible, trigger scroll)
+═══════════════════════════════════════════ */
+.scroll-chapter {
+  position: absolute; left: 0; right: 0;
+  height: 100vh; pointer-events: none;
+}
+.scroll-chapter:nth-child(1) { top: 0vh; }
+.scroll-chapter:nth-child(2) { top: 100vh; }
+.scroll-chapter:nth-child(3) { top: 200vh; }
+.scroll-chapter:nth-child(4) { top: 300vh; }
+.scroll-chapter:nth-child(5) { top: 400vh; }
+
+/* ═══════════════════════════════════════════
+   SKY LINES (decorative horizontal lines in hero)
+═══════════════════════════════════════════ */
+.sky-lines {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden; opacity: 0.15;
+}
+.sky-line-h {
+  position: absolute; left: 0; right: 0; height: 1px;
+  background: var(--sky-deep);
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER CTA
+═══════════════════════════════════════════ */
+.footer-cta {
+  background: var(--ink);
+  color: var(--white);
+  padding: 100px 64px;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.footer-cta::before {
+  content: 'DIRECTX';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-disp);
+  font-size: clamp(120px, 20vw, 280px);
+  color: rgba(255,255,255,0.03);
+  letter-spacing: 0.1em; white-space: nowrap;
+  pointer-events: none;
+}
+.footer-title {
+  font-family: var(--font-disp);
+  font-size: clamp(40px, 7vw, 90px);
+  margin-bottom: 16px; letter-spacing: 0.04em;
+}
+.footer-title span { color: var(--sky-deep); }
+.footer-sub { font-size: 16px; color: rgba(255,255,255,0.5); margin-bottom: 40px; }
+.footer-btn {
+  display: inline-block;
+  background: var(--accent); color: var(--white);
+  padding: 16px 44px; border-radius: 4px;
+  font-family: var(--font-disp); font-size: 22px;
+  letter-spacing: 0.1em; cursor: pointer; border: none;
+  transition: transform 0.2s, background 0.2s;
+}
+.footer-btn:hover { transform: translateY(-2px); background: #0055BB; }
+.footer-copy {
+  margin-top: 60px; font-size: 12px; color: rgba(255,255,255,0.25);
+  letter-spacing: 0.12em; font-family: var(--font-mono);
+}
+</style>
+</head>
+<body>
+
+<!-- ── PLANE INTRO ── -->
+<div id="plane-intro">
+  <div class="contrail"></div>
+  <svg class="plane-svg" viewBox="0 0 300 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Glossy white fuselage bottom -->
+      <linearGradient id="fuseWhite" x1="0" y1="50" x2="0" y2="75" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#FFFFFF"/>
+        <stop offset="60%" stop-color="#E8ECEF"/>
+        <stop offset="100%" stop-color="#B0B8C1"/>
+      </linearGradient>
+      <!-- Glossy dark blue top -->
+      <linearGradient id="fuseBlue" x1="0" y1="20" x2="0" y2="50" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#1B3B7B"/>
+        <stop offset="40%" stop-color="#0D1E4A"/>
+        <stop offset="100%" stop-color="#07112E"/>
+      </linearGradient>
+      <!-- Wing Gradient Front -->
+      <linearGradient id="wingGradFront" x1="150" y1="55" x2="130" y2="95" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#F8FAFC"/>
+        <stop offset="100%" stop-color="#A8B0B8"/>
+      </linearGradient>
+      <!-- Engine Gradient -->
+      <linearGradient id="engGrad" x1="160" y1="60" x2="160" y2="76" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#224A9A"/>
+        <stop offset="50%" stop-color="#0D1E4A"/>
+        <stop offset="100%" stop-color="#04091A"/>
+      </linearGradient>
+    </defs>
+    
+    <!-- Fuselage shadow / depth -->
+    <path d="M30 50 C 30 20, 250 20, 270 40 C 285 45, 290 50, 290 50 C 290 50, 280 65, 260 70 C 230 75, 30 75, 30 50 Z" fill="url(#fuseWhite)"/>
+    
+    <!-- Top Half (Dark Blue) -->
+    <path d="M30 50 C 30 20, 250 20, 270 40 C 285 45, 290 50, 290 50 L 30 50 Z" fill="url(#fuseBlue)"/>
+    
+    <!-- Cyan Stripe -->
+    <path d="M30 50 L 290 50 L 285 53 L 30 53 Z" fill="#3DAED5"/>
+    <path d="M30 53 L 285 53 L 280 54 L 30 54 Z" fill="#207A9A"/> <!-- Shadow for stripe -->
+
+    <!-- Vertical tail -->
+    <path d="M35 50 L 20 5 L 60 5 L 70 50 Z" fill="url(#fuseBlue)"/>
+    <!-- Tail Feathers (Cyan/White) -->
+    <path d="M22 10 L 58 10 L 60 14 L 24 14 Z" fill="#3DAED5"/>
+    <path d="M25 18 L 62 18 L 64 22 L 27 22 Z" fill="#55C6EB"/>
+    <path d="M28 26 L 66 26 L 68 30 L 30 30 Z" fill="#75D6F2"/>
+    <path d="M31 34 L 70 34 L 72 38 L 33 38 Z" fill="#9AE3F8"/>
+    <!-- Tail edge shading -->
+    <path d="M60 5 L 70 50 L 67 50 L 57 5 Z" fill="#04091A" opacity="0.4"/>
+
+    <!-- Left Wing (Back) -->
+    <path d="M160 55 L 130 15 L 150 15 L 190 55 Z" fill="#88929C"/>
+    
+    <!-- Right Wing (Front) -->
+    <path d="M150 55 L 110 95 L 130 95 L 180 55 Z" fill="url(#wingGradFront)"/>
+    <!-- Wing flap lines -->
+    <line x1="120" y1="90" x2="160" y2="55" stroke="#88929C" stroke-width="0.5"/>
+    <line x1="125" y1="90" x2="165" y2="55" stroke="#88929C" stroke-width="0.5"/>
+
+    <!-- Winglet Front -->
+    <path d="M110 95 L 105 80 L 110 80 Z" fill="#0D1E4A"/>
+    <path d="M108 80 L 110 95 L 113 95 L 111 80 Z" fill="#3DAED5"/>
+
+    <!-- Tail Wing (Back) -->
+    <path d="M40 50 L 25 35 L 35 35 L 55 50 Z" fill="#88929C"/>
+    <!-- Tail Wing (Front) -->
+    <path d="M40 50 L 25 65 L 35 65 L 55 50 Z" fill="#D0D5DB"/>
+
+    <!-- Windows (Front to back) -->
+    <circle cx="240" cy="42" r="2.5" fill="#FFFFFF"/>
+    <circle cx="230" cy="42" r="2.5" fill="#FFFFFF"/>
+    <circle cx="220" cy="42" r="2.5" fill="#FFFFFF"/>
+    <circle cx="210" cy="42" r="2.5" fill="#FFFFFF"/>
+    <!-- Front Door -->
+    <rect x="250" y="36" width="8" height="15" rx="2" fill="#0D1E4A" stroke="#FFFFFF" stroke-width="1"/>
+    <!-- Door window -->
+    <circle cx="254" cy="40" r="1.5" fill="#FFFFFF"/>
+    
+    <!-- Mid Windows -->
+    <circle cx="190" cy="42" r="2.5" fill="#FFFFFF"/>
+    <circle cx="180" cy="42" r="2.5" fill="#FFFFFF"/>
+    <circle cx="170" cy="42" r="2.5" fill="#FFFFFF"/>
+    <circle cx="160" cy="42" r="2.5" fill="#FFFFFF"/>
+    <circle cx="150" cy="42" r="2.5" fill="#FFFFFF"/>
+    <circle cx="140" cy="42" r="2.5" fill="#FFFFFF"/>
+    <circle cx="130" cy="42" r="2.5" fill="#FFFFFF"/>
+    <circle cx="120" cy="42" r="2.5" fill="#FFFFFF"/>
+    <circle cx="110" cy="42" r="2.5" fill="#FFFFFF"/>
+    <circle cx="100" cy="42" r="2.5" fill="#FFFFFF"/>
+    <circle cx="90" cy="42" r="2.5" fill="#FFFFFF"/>
+    
+    <!-- Back Door -->
+    <rect x="70" y="36" width="8" height="15" rx="2" fill="#0D1E4A" stroke="#FFFFFF" stroke-width="1"/>
+    <!-- Door window -->
+    <circle cx="74" cy="40" r="1.5" fill="#FFFFFF"/>
+
+    <!-- Cockpit -->
+    <!-- Add reflection to cockpit for realism -->
+    <path d="M265 42 C 270 38, 275 39, 280 43 L 265 43 Z" fill="#0B1221"/>
+    <path d="M266 41 C 270 39, 275 39.5, 278 42 L 266 42 Z" fill="#3A4A63"/>
+
+    <!-- Landing gear shadow on fuselage -->
+    <ellipse cx="145" cy="72" rx="20" ry="4" fill="#000000" opacity="0.15"/>
+
+    <!-- Engine -->
+    <ellipse cx="160" cy="68" rx="16" ry="8" fill="url(#engGrad)"/>
+    <ellipse cx="146" cy="68" rx="4" ry="6" fill="#111111"/>
+    <!-- Engine lip ring (metallic) -->
+    <path d="M146 62 C 143 62, 143 74, 146 74 C 148 74, 148 62, 146 62 Z" fill="#D0D5DB"/>
+    <!-- Engine exhaust -->
+    <ellipse cx="174" cy="68" rx="4" ry="7" fill="#666666"/>
+    <path d="M174 61 L 180 63 L 180 73 L 174 75 Z" fill="#444444"/>
+    <!-- Engine cyan stripe -->
+    <path d="M150 64 L 170 64 L 170 66 L 150 66 Z" fill="#3DAED5"/>
+
+    <!-- Wing shadow on engine -->
+    <path d="M152 60 L 168 60 L 165 65 L 150 65 Z" fill="#04091A" opacity="0.5"/>
+    
+    <!-- AZAL TEXT -->
+    <text x="100" y="36" font-family="Bebas Neue, sans-serif" font-size="28" font-weight="900" fill="#FFFFFF" letter-spacing="5" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">AZAL</text>
+  </svg>
+</div>
+
+<!-- ── NAVBAR ── -->
+<nav>
+  <div class="nav-logo">Direct<span>X</span></div>
+  <div class="nav-links">
+    <span>Platform</span>
+    <span>Services</span>
+    <span>About</span>
+    <button class="nav-cta" onclick="enterPlatform()">Get Started</button>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <!-- Decorative sky lines -->
+  <div class="sky-lines">
+    <div class="sky-line-h" style="top:20%"></div>
+    <div class="sky-line-h" style="top:40%"></div>
+    <div class="sky-line-h" style="top:60%"></div>
+    <div class="sky-line-h" style="top:80%"></div>
+  </div>
+
+  <!-- Drifting clouds -->
+  <div class="cloud cloud-1"></div>
+  <div class="cloud cloud-2"></div>
+  <div class="cloud cloud-3"></div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">AZCON · Smart Travel Platform · GYD</div>
+    <div class="hero-title">Direct<span class="hl">X</span></div>
+    <div class="hero-tagline">ALL IN ONE</div>
+    <p class="hero-sub">One unified platform connecting flights, transit, eSIM, payments, and AI — built for Azerbaijan's future of travel.</p>
+
+    <div class="stat-bar">
+      <div class="stat-item">
+        <div class="stat-num">14+</div>
+        <div class="stat-lbl">Live Flights</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">5</div>
+        <div class="stat-lbl">Languages</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">3</div>
+        <div class="stat-lbl">Transit Modes</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">1</div>
+        <div class="stat-lbl">Platform</div>
+      </div>
+    </div>
+
+    <div class="scroll-hint">
+      <span>Scroll to explore</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     METRO FEATURES SECTION
+═══════════════════════════════════════════ -->
+<section class="metro-section" id="metro-section">
+
+  <!-- Invisible scroll chapters -->
+  <div class="scroll-chapter" data-chapter="0"></div>
+  <div class="scroll-chapter" data-chapter="1"></div>
+  <div class="scroll-chapter" data-chapter="2"></div>
+  <div class="scroll-chapter" data-chapter="3"></div>
+  <div class="scroll-chapter" data-chapter="4"></div>
+
+  <!-- Sticky stage (stays on screen while scrolling through 500vh) -->
+  <div class="metro-stage" id="metro-stage">
+
+    <!-- ── METRO RAIL CENTER ── -->
+    <div class="metro-rail">
+      <!-- Tracks -->
+      <div class="rail-left"></div>
+      <div class="rail-right"></div>
+
+      <!-- Animated ties -->
+      <div class="rail-ties">
+        <div class="ties-inner" id="ties">
+          <!-- generated by JS -->
+        </div>
+      </div>
+
+      <!-- Station dots -->
+      <div class="station-dot active" data-station="0"></div>
+      <div class="station-dot" data-station="1"></div>
+      <div class="station-dot" data-station="2"></div>
+      <div class="station-dot" data-station="3"></div>
+      <div class="station-dot" data-station="4"></div>
+
+      <!-- Looping metro train -->
+      <div class="metro-train-wrap" id="metro-train">
+        <div class="train-glow"></div>
+        
+        <!-- Tail Wagon (Top) -->
+        <svg class="train-car tail" viewBox="0 0 72 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="roof-tail" x1="0" y1="0" x2="72" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#9BA4AE"/><stop offset="20%" stop-color="#E0E5EA"/><stop offset="50%" stop-color="#FFFFFF"/><stop offset="80%" stop-color="#E0E5EA"/><stop offset="100%" stop-color="#9BA4AE"/>
+            </linearGradient>
+            <linearGradient id="nose-tail" x1="0" y1="40" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#222"/><stop offset="100%" stop-color="#050505"/>
+            </linearGradient>
+          </defs>
+          <path d="M6 160 L66 160 L66 30 C66 10, 60 0, 36 0 C12 0, 6 10, 6 30 Z" fill="url(#roof-tail)"/>
+          <rect x="6" y="25" width="4" height="135" fill="#7B1FA2"/>
+          <rect x="62" y="25" width="4" height="135" fill="#7B1FA2"/>
+          <path d="M10 40 L62 40 C62 15, 55 4, 36 4 C17 4, 10 15, 10 40 Z" fill="url(#nose-tail)"/>
+          <path d="M12 15 C20 8, 52 8, 60 15" stroke="#FF1744" stroke-width="3" stroke-linecap="round" filter="drop-shadow(0 0 4px #FF1744)"/>
+          <path d="M14 35 C25 28, 47 28, 58 35 L50 45 L22 45 Z" fill="#0B1221"/>
+          <rect x="22" y="54" width="28" height="36" rx="2" fill="#88929C" stroke="#A8B0B8" stroke-width="1"/>
+          <line x1="26" y1="60" x2="46" y2="60" stroke="#444" stroke-width="2"/>
+          <line x1="26" y1="66" x2="46" y2="66" stroke="#444" stroke-width="2"/>
+          <rect x="22" y="104" width="28" height="36" rx="2" fill="#88929C" stroke="#A8B0B8" stroke-width="1"/>
+          <line x1="26" y1="110" x2="46" y2="110" stroke="#444" stroke-width="2"/>
+          <line x1="26" y1="116" x2="46" y2="116" stroke="#444" stroke-width="2"/>
+          <rect x="18" y="156" width="36" height="4" fill="#222"/>
+        </svg>
+
+        <div class="train-connection"></div>
+
+        <!-- Middle Wagon 1 -->
+        <svg class="train-car middle" viewBox="0 0 72 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="roof-mid" x1="0" y1="0" x2="72" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#9BA4AE"/><stop offset="20%" stop-color="#E0E5EA"/><stop offset="50%" stop-color="#FFFFFF"/><stop offset="80%" stop-color="#E0E5EA"/><stop offset="100%" stop-color="#9BA4AE"/>
+            </linearGradient>
+          </defs>
+          <rect x="6" y="0" width="60" height="160" fill="url(#roof-mid)"/>
+          <rect x="6" y="0" width="4" height="160" fill="#7B1FA2"/>
+          <rect x="62" y="0" width="4" height="160" fill="#7B1FA2"/>
+          <rect x="22" y="20" width="28" height="36" rx="2" fill="#88929C" stroke="#A8B0B8" stroke-width="1"/>
+          <line x1="26" y1="26" x2="46" y2="26" stroke="#444" stroke-width="2"/>
+          <line x1="26" y1="32" x2="46" y2="32" stroke="#444" stroke-width="2"/>
+          <line x1="26" y1="38" x2="46" y2="38" stroke="#444" stroke-width="2"/>
+          <rect x="22" y="104" width="28" height="36" rx="2" fill="#88929C" stroke="#A8B0B8" stroke-width="1"/>
+          <line x1="26" y1="110" x2="46" y2="110" stroke="#444" stroke-width="2"/>
+          <line x1="26" y1="116" x2="46" y2="116" stroke="#444" stroke-width="2"/>
+          <line x1="26" y1="122" x2="46" y2="122" stroke="#444" stroke-width="2"/>
+          <rect x="18" y="0" width="36" height="4" fill="#222"/>
+          <rect x="18" y="156" width="36" height="4" fill="#222"/>
+        </svg>
+
+        <div class="train-connection"></div>
+        
+        <!-- Middle Wagon 2 -->
+        <svg class="train-car middle" viewBox="0 0 72 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="0" width="60" height="160" fill="url(#roof-mid)"/>
+          <rect x="6" y="0" width="4" height="160" fill="#7B1FA2"/>
+          <rect x="62" y="0" width="4" height="160" fill="#7B1FA2"/>
+          <rect x="22" y="20" width="28" height="36" rx="2" fill="#88929C" stroke="#A8B0B8" stroke-width="1"/>
+          <line x1="26" y1="26" x2="46" y2="26" stroke="#444" stroke-width="2"/>
+          <line x1="26" y1="32" x2="46" y2="32" stroke="#444" stroke-width="2"/>
+          <line x1="26" y1="38" x2="46" y2="38" stroke="#444" stroke-width="2"/>
+          <rect x="22" y="104" width="28" height="36" rx="2" fill="#88929C" stroke="#A8B0B8" stroke-width="1"/>
+          <line x1="26" y1="110" x2="46" y2="110" stroke="#444" stroke-width="2"/>
+          <line x1="26" y1="116" x2="46" y2="116" stroke="#444" stroke-width="2"/>
+          <line x1="26" y1="122" x2="46" y2="122" stroke="#444" stroke-width="2"/>
+          <rect x="18" y="0" width="36" height="4" fill="#222"/>
+          <rect x="18" y="156" width="36" height="4" fill="#222"/>
+        </svg>
+
+        <div class="train-connection"></div>
+
+        <!-- Head Wagon (Bottom, moving down) -->
+        <svg class="train-car head" viewBox="0 0 72 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="nose-head" x1="0" y1="120" x2="0" y2="160" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#222"/><stop offset="100%" stop-color="#050505"/>
+            </linearGradient>
+          </defs>
+          <path d="M6 0 L66 0 L66 130 C66 150, 60 160, 36 160 C12 160, 6 150, 6 130 Z" fill="url(#roof-tail)"/>
+          <rect x="6" y="0" width="4" height="135" fill="#7B1FA2"/>
+          <rect x="62" y="0" width="4" height="135" fill="#7B1FA2"/>
+          <path d="M10 120 L62 120 C62 145, 55 156, 36 156 C17 156, 10 145, 10 120 Z" fill="url(#nose-head)"/>
+          <path d="M12 145 C20 152, 52 152, 60 145" stroke="#E3F2FD" stroke-width="3" stroke-linecap="round" filter="drop-shadow(0 0 4px #90CAF9)"/>
+          <circle cx="16" cy="148" r="1.5" fill="#FF1744" filter="drop-shadow(0 0 2px #FF1744)"/>
+          <circle cx="56" cy="148" r="1.5" fill="#FF1744" filter="drop-shadow(0 0 2px #FF1744)"/>
+          <path d="M14 125 C25 132, 47 132, 58 125 L50 115 L22 115 Z" fill="#0B1221"/>
+          <rect x="22" y="20" width="28" height="36" rx="2" fill="#88929C" stroke="#A8B0B8" stroke-width="1"/>
+          <line x1="26" y1="26" x2="46" y2="26" stroke="#444" stroke-width="2"/>
+          <line x1="26" y1="32" x2="46" y2="32" stroke="#444" stroke-width="2"/>
+          <line x1="26" y1="38" x2="46" y2="38" stroke="#444" stroke-width="2"/>
+          <rect x="22" y="70" width="28" height="36" rx="2" fill="#88929C" stroke="#A8B0B8" stroke-width="1"/>
+          <line x1="26" y1="76" x2="46" y2="76" stroke="#444" stroke-width="2"/>
+          <line x1="26" y1="82" x2="46" y2="82" stroke="#444" stroke-width="2"/>
+          <rect x="18" y="0" width="36" height="4" fill="#222"/>
+        </svg>
+      </div>
+
+      <!-- Chapter progress label -->
+      <div class="chapter-label" id="chapter-label">01 / 05</div>
+    </div>
+
+    <!-- ══ FEATURE PANELS ══ -->
+
+    <!-- F1: AZAL Transit + AI — LEFT -->
+    <div class="feature-panel from-left" id="fp-0">
+      <div class="feat-num">01 · Feature</div>
+      <div class="feat-icon fi-blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0066CC" stroke-width="1.8">
+          <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 19-7z"/>
+        </svg>
+      </div>
+      <div class="feat-title">AZAL Transit<br>&amp; AI Support</div>
+      <p class="feat-body">Real-time Azal transit schedules integrated with smart AI assistant support for seamless travel planning.</p>
+      <span class="feat-tag tag-blue">Live Schedules</span>
+    </div>
+
+    <!-- F2: Smart Route — RIGHT -->
+    <div class="feature-panel from-right" id="fp-1">
+      <div class="feat-num">02 · Feature</div>
+      <div class="feat-icon fi-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="1.8">
+          <circle cx="12" cy="12" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+        </svg>
+      </div>
+      <div class="feat-title">Smart Route<br>Optimization</div>
+      <p class="feat-body">Efficient vehicle usage and intelligent routing to find the best and fastest paths for your journey.</p>
+      <span class="feat-tag tag-blue">Google Maps API</span>
+    </div>
+
+    <!-- F3: eSIM — LEFT -->
+    <div class="feature-panel from-left" id="fp-2">
+      <div class="feat-num">03 · Feature</div>
+      <div class="feat-icon fi-orange">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#FF6B2B" stroke-width="1.8">
+          <rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/>
+        </svg>
+      </div>
+      <div class="feat-title">eSIM<br>Connectivity</div>
+      <p class="feat-body">Instant eSIM service activation for uninterrupted, high-speed connectivity wherever your journey takes you.</p>
+      <span class="feat-tag tag-orange">Aztelekom</span>
+    </div>
+
+    <!-- F4: Unified Payment — RIGHT -->
+    <div class="feature-panel from-right" id="fp-3">
+      <div class="feat-num">04 · Feature</div>
+      <div class="feat-icon fi-gold">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="1.8">
+          <rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/>
+        </svg>
+      </div>
+      <div class="feat-title">Unified<br>Payment System</div>
+      <p class="feat-body">A single application for all your payments — from metro rides to supermarket shopping, all in one tap.</p>
+      <span class="feat-tag tag-gold">QR · NFC · Wallet</span>
+    </div>
+
+    <!-- F5: Multilingual AI — LEFT -->
+    <div class="feature-panel from-left" id="fp-4">
+      <div class="feat-num">05 · Feature</div>
+      <div class="feat-icon fi-purple">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="1.8">
+          <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
+        </svg>
+      </div>
+      <div class="feat-title">Multilingual<br>AI Assistant</div>
+      <p class="feat-body">A smart, multilingual AI assistant ready to help you navigate all AZCON services effortlessly in any language.</p>
+      <span class="feat-tag tag-blue">AZ · EN · RU · TR · FA</span>
+    </div>
+
+  </div><!-- /metro-stage -->
+</section>
+
+<!-- ── FOOTER CTA ── -->
+<footer class="footer-cta">
+  <div class="footer-title">One Platform.<br><span>Every Journey.</span></div>
+  <p class="footer-sub">AZCON DirectX — connecting flights, transit, eSIM, payments and AI in a single unified experience.</p>
+  <button class="footer-btn" onclick="enterPlatform()">Enter Platform</button>
+  <div class="footer-copy">© 2026 AZCON · DirectX Platform · All rights reserved</div>
+</footer>
+
+<script>
+/* ── GENERATE RAIL TIES ── */
+const tiesEl = document.getElementById('ties');
+for (let i = 0; i < 30; i++) {
+  const d = document.createElement('div');
+  d.className = 'tie';
+  tiesEl.appendChild(d);
+}
+
+/* ── HIDE PLANE OVERLAY AFTER ANIMATION ── */
+setTimeout(() => {
+  const intro = document.getElementById('plane-intro');
+  intro.style.transition = 'opacity 0.6s';
+  intro.style.opacity = '0';
+  setTimeout(() => intro.remove(), 600);
+}, 4600);
+
+/* ── SCROLL-BASED FEATURE REVEAL (3D Carousel) ── */
+const section  = document.getElementById('metro-section');
+const panels   = document.querySelectorAll('.feature-panel');
+const stations = document.querySelectorAll('.station-dot');
+const label    = document.getElementById('chapter-label');
+
+let currentChapter = -1;
+let targetProgress = 0;
+let currentProgress = 0;
+
+function updateChapter(ch) {
+  if (ch === currentChapter) return;
+  currentChapter = ch;
+
+  panels.forEach((p, i) => {
+    if(i === ch) {
+       p.classList.add('active');
+    } else {
+       p.classList.remove('active');
+    }
+  });
+
+  stations.forEach((s, i) => {
+    s.classList.toggle('active', i === ch);
+  });
+
+  if (ch >= 0 && ch <= 4) {
+    label.textContent = `0${ch + 1} / 05`;
+    label.style.opacity = '1';
+  } else {
+    label.style.opacity = '0';
+  }
+}
+
+function onScroll() {
+  const rect = section.getBoundingClientRect();
+  const sectionTop    = -rect.top;            
+  const sectionHeight = section.offsetHeight; 
+  const viewH         = window.innerHeight;
+
+  const scrollable = sectionHeight - viewH;
+  if (scrollable <= 0) return;
+
+  let p = sectionTop / scrollable;
+  p = Math.max(0, Math.min(1, p));
+  
+  const chapter = Math.round(p * 4);
+  updateChapter(chapter);
+  
+  targetProgress = p;
+}
+
+function render3D() {
+  currentProgress += (targetProgress - currentProgress) * 0.08;
+
+  const carouselRotation = currentProgress * (4 * 72); 
+  const verticalSpacing = 400; // Hər kart arasındakı şaquli məsafə
+
+  panels.forEach((p, i) => {
+    const angle = (i * 72) - carouselRotation;
+    
+    // Şaquli sürüşmə: növbəti kart daha aşağıda (müsbət Y), əvvəlki daha yuxarıda (mənfi Y) olur
+    const activeIndexFloat = carouselRotation / 72;
+    const yOffset = (i - activeIndexFloat) * verticalSpacing;
+
+    p.style.transform = `translateY(${yOffset}px) rotateY(${angle}deg) translateZ(520px)`;
+    
+    let normAngle = ((angle % 360) + 360) % 360;
+    let dist = Math.min(normAngle, 360 - normAngle);
+    
+    let op = 1 - (dist / 140);
+    p.style.opacity = Math.max(0.1, Math.min(1, op));
+    p.style.pointerEvents = dist > 60 ? 'none' : 'auto';
+    
+    // Depth of field blur effect
+    let blurAmt = (dist / 180) * 8; // Max 8px blur at the back
+    p.style.filter = `blur(${blurAmt}px)`;
+    
+    // Ensure 3D stacking relative to the train (z-index 10)
+    p.style.zIndex = dist < 90 ? 20 : 5;
+  });
+
+  requestAnimationFrame(render3D);
+}
+
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll(); 
+render3D();
+
+/* ── ENTER PLATFORM TRANSITION ── */
+function enterPlatform() {
+  document.body.style.transition = 'opacity 0.6s ease';
+  document.body.style.opacity = '0';
+  setTimeout(() => {
+    window.location.href = 'azcon-one.html';
+  }, 600);
+}
+</script>
+</body>
+</html>
