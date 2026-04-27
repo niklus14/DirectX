@@ -7,6 +7,7 @@ const flightsRouter = require('./routes/flights');
 const aiRouter = require('./routes/ai');
 const weatherRouter = require('./routes/weather');
 const currencyRouter = require('./routes/currency');
+const smartRouteRouter = require('./routes/smartroute');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +25,7 @@ app.use('/api/flights', flightsRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/weather', weatherRouter);
 app.use('/api/currency', currencyRouter);
+app.use('/api/smartroute', smartRouteRouter);
 
 // ── Health Check ─────────────────────────────────────────
 app.get('/api/health', (req, res) => {

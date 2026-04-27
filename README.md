@@ -71,6 +71,7 @@ YOU_API_KEY=your_you_dot_com_key_here
 AVIATIONSTACK_API_KEY=your_aviationstack_key_here
 EXCHANGERATE_API_KEY=your_exchange_rate_key_here
 OPENWEATHERMAP_API_KEY=your_openweathermap_key_here
+MAPBOX_API_KEY=your_mapbox_token_here
 ```
 
 ### 4. Run the Development Server
