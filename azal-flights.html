@@ -266,7 +266,7 @@ async function loadFlights() {
     checkDelays(allFlights);
   } catch (err) {
     document.getElementById('table-wrap').innerHTML =
-      `<div class="state-msg">⚠️ ${err.message}<br><small>Make sure the backend server is running on port 3000.</small></div>`;
+      `<div class="state-msg">⚠️ ${err.message}<br><small>API is unavailable. Check the deployment logs and AVIATIONSTACK_API_KEY.</small></div>`;
   } finally {
     icon.className = ''; icon.textContent = '↻';
   }
