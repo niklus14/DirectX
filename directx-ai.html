@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirectX AI · AZCON</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  :root {
+    --sky: #0B1D26;
+    --sky-mid: #153243;
+    --sky-deep: #1F455A;
+    --ink: #FFFFFF;
+    --ink-2: #8EA7B4;
+    --ink-3: #5C7A8B;
+    --accent: #3AE2CE;
+    --accent-glow: rgba(58, 226, 206, 0.4);
+    --dark-bg: #061014;
+    --panel-bg: rgba(11, 29, 38, 0.6);
+    --user-msg: rgba(58, 226, 206, 0.15);
+    --ai-msg: rgba(255, 255, 255, 0.05);
+    --font-disp: 'Bebas Neue', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: radial-gradient(circle at 50% -20%, #0F2A36 0%, var(--dark-bg) 80%);
+    background-color: var(--dark-bg);
+    color: var(--ink);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: rgba(6, 16, 20, 0.7);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 10;
+  }
+  
+  .back-btn {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--ink-2); font-weight: 500;
+    cursor: pointer; text-decoration: none;
+    transition: color 0.3s;
+  }
+  .back-btn:hover { color: var(--accent); }
+  .back-btn svg { width: 18px; height: 18px; }
+
+  .header-title {
+    font-family: var(--font-disp);
+    font-size: 32px;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-title .pulse {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 var(--accent-glow); }
+    70% { box-shadow: 0 0 0 10px rgba(58, 226, 206, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(58, 226, 206, 0); }
+  }
+
+  /* Chat Container */
+  .chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 30px 20px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+  }
+  
+  .chat-container::-webkit-scrollbar { width: 6px; }
+  .chat-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+  .message {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message.user { flex-direction: row-reverse; }
+
+  .avatar {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .user .avatar {
+    background: rgba(255,255,255,0.1);
+  }
+  .ai .avatar {
+    background: rgba(58, 226, 206, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(58, 226, 206, 0.3);
+    box-shadow: 0 0 15px rgba(58, 226, 206, 0.2);
+  }
+  .avatar svg { width: 20px; height: 20px; }
+
+  .bubble {
+    max-width: 75%;
+    padding: 16px 20px;
+    border-radius: 16px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink);
+    backdrop-filter: blur(10px);
+  }
+  
+  .ai .bubble {
+    background: var(--ai-msg);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-top-left-radius: 4px;
+  }
+  
+  .ai .bubble p { margin-bottom: 12px; }
+  .ai .bubble p:last-child { margin-bottom: 0; }
+  .ai .bubble ul, .ai .bubble ol { margin-left: 20px; margin-bottom: 12px; }
+  .ai .bubble li { margin-bottom: 6px; }
+  .ai .bubble pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto; margin-bottom: 12px; }
+  .ai .bubble code { font-family: var(--font-mono); font-size: 13px; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; }
+  .ai .bubble pre code { padding: 0; background: transparent; }
+  .ai .bubble h1, .ai .bubble h2, .ai .bubble h3 { font-family: var(--font-disp); letter-spacing: 0.05em; color: var(--accent); margin-bottom: 12px; margin-top: 16px; }
+  .ai .bubble h1:first-child, .ai .bubble h2:first-child, .ai .bubble h3:first-child { margin-top: 0; }
+  
+  .user .bubble {
+    background: var(--user-msg);
+    border: 1px solid rgba(58, 226, 206, 0.2);
+    border-top-right-radius: 4px;
+    color: #E0F2F1;
+  }
+
+  /* Intro Card styling for the first AI message */
+  .intro-card {
+    background: rgba(11, 29, 38, 0.4);
+    border: 1px solid rgba(58, 226, 206, 0.2);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 12px;
+  }
+  .intro-card h3 {
+    font-family: var(--font-mono); font-size: 13px; color: var(--accent);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px;
+  }
+  .intro-card ul {
+    list-style: none; margin-left: 0;
+  }
+  .intro-card li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 14px; color: var(--ink-2); margin-bottom: 8px;
+  }
+  .intro-card li::before {
+    content: ''; display: inline-block; width: 6px; height: 6px;
+    background: var(--accent); border-radius: 50%; margin-top: 8px;
+  }
+
+  /* Input Area */
+  .input-area {
+    padding: 20px 40px 40px;
+    background: linear-gradient(to top, var(--dark-bg) 60%, transparent);
+  }
+  
+  .input-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .input-wrapper:focus-within {
+    border-color: rgba(58, 226, 206, 0.5);
+    box-shadow: 0 10px 40px rgba(58, 226, 206, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    padding: 12px 16px;
+    resize: none;
+    max-height: 150px;
+    outline: none;
+    line-height: 1.5;
+  }
+  textarea::placeholder { color: var(--ink-3); }
+
+  .send-btn {
+    width: 44px; height: 44px;
+    border-radius: 14px;
+    background: var(--accent);
+    color: var(--dark-bg);
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: transform 0.2s, background 0.2s;
+    flex-shrink: 0;
+  }
+  .send-btn:hover {
+    transform: scale(1.05);
+    background: #4AFFE9;
+  }
+  .send-btn svg { width: 20px; height: 20px; }
+  
+  .send-btn:disabled {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.3);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: flex; gap: 5px; padding: 8px 12px;
+  }
+  .typing-dot {
+    width: 6px; height: 6px; background: var(--ink-2); border-radius: 50%;
+    animation: type 1.4s infinite ease-in-out both;
+  }
+  .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+  .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+  @keyframes type {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); background: var(--accent); }
+  }
+  
+  .disclaimer {
+    text-align: center; font-size: 12px; color: var(--ink-3);
+    margin-top: 16px; font-family: var(--font-mono);
+  }
+
+</style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <a href="azcon-one.html" class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Dashboard
+    </a>
+    <div class="header-title">
+      <div class="pulse"></div>
+      DirectX AI
+    </div>
+    <div style="width: 100px;"></div> <!-- Spacer for flex alignment -->
+  </header>
+
+  <!-- Chat Area -->
+  <div class="chat-container" id="chat-container">
+    
+    <!-- Initial AI Greeting -->
+    <div class="message ai">
+      <div class="avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 12L2.5 7.5"/><path d="M12 12l9.5-4.5"/><path d="M12 12v10"/></svg>
+      </div>
+      <div class="bubble">
+        Hello! I am <strong>DirectX AI</strong>, the central intelligence of the AZCON platform. I am fully integrated into the ecosystem and can communicate in multiple languages.
+        
+        <div class="intro-card">
+          <h3>Capabilities</h3>
+          <ul>
+            <li>Access real-time AZAL flight schedules and transit data</li>
+            <li>Optimize your travel routes across Baku and beyond</li>
+            <li>Assist with eSIM activations and connectivity issues</li>
+            <li>Provide insights from your Unified Wallet and transactions</li>
+            <li>Answer general queries using up-to-date web intelligence</li>
+          </ul>
+        </div>
+        
+        <p style="margin-top:12px; font-size: 14px; color: var(--ink-2);">How can I assist you today? You can ask me in English, Azerbaijani, Russian, or any other language.</p>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- Input Area -->
+  <div class="input-area">
+    <div class="input-wrapper">
+      <textarea id="chat-input" rows="1" placeholder="Message DirectX AI..."></textarea>
+      <button class="send-btn" id="send-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
+    </div>
+    <div class="disclaimer">Large scope hybrid AI assistant</div>
+  </div>
+
+<script>
+  const chatContainer = document.getElementById('chat-container');
+  const chatInput = document.getElementById('chat-input');
+  const sendBtn = document.getElementById('send-btn');
+
+  // Auto-resize textarea
+  chatInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = (this.scrollHeight) + 'px';
+    if(this.value.trim() === '') sendBtn.disabled = true;
+    else sendBtn.disabled = false;
+  });
+
+  // Send on Enter (Shift+Enter for new line)
+  chatInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  sendBtn.addEventListener('click', sendMessage);
+
+  function appendMessage(role, text, isHTML = false) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${role}`;
+    
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 'avatar';
+    
+    if (role === 'user') {
+      avatarDiv.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+    } else {
+      avatarDiv.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 12L2.5 7.5"/><path d="M12 12l9.5-4.5"/><path d="M12 12v10"/></svg>`;
+    }
+
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = 'bubble';
+    
+    if (isHTML) {
+      bubbleDiv.innerHTML = text;
+    } else {
+      if (role === 'ai') {
+        bubbleDiv.innerHTML = marked.parse(text);
+      } else {
+        bubbleDiv.textContent = text;
+      }
+    }
+
+    msgDiv.appendChild(avatarDiv);
+    msgDiv.appendChild(bubbleDiv);
+    
+    chatContainer.appendChild(msgDiv);
+    scrollToBottom();
+  }
+
+  function appendTypingIndicator() {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ai typing`;
+    msgDiv.id = 'typing-indicator';
+    
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 'avatar';
+    avatarDiv.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 12L2.5 7.5"/><path d="M12 12l9.5-4.5"/><path d="M12 12v10"/></svg>`;
+    
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = 'bubble';
+    bubbleDiv.style.padding = '8px 16px';
+    bubbleDiv.innerHTML = `
+      <div class="typing-indicator">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    `;
+
+    msgDiv.appendChild(avatarDiv);
+    msgDiv.appendChild(bubbleDiv);
+    chatContainer.appendChild(msgDiv);
+    scrollToBottom();
+  }
+
+  function removeTypingIndicator() {
+    const indicator = document.getElementById('typing-indicator');
+    if (indicator) {
+      indicator.remove();
+    }
+  }
+
+  function scrollToBottom() {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    // Reset input
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    sendBtn.disabled = true;
+
+    // Show User Message
+    appendMessage('user', text);
+
+    // Show Typing
+    appendTypingIndicator();
+
+    try {
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await response.json();
+      removeTypingIndicator();
+
+      if (response.ok) {
+        appendMessage('ai', data.reply);
+      } else {
+        appendMessage('ai', `Error: ${data.error || 'Something went wrong.'}`);
+      }
+    } catch (error) {
+      removeTypingIndicator();
+      appendMessage('ai', `Connection error: Unable to reach the server.`);
+      console.error(error);
+    }
+  }
+</script>
+</body>
+</html>

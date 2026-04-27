@@ -138,9 +138,28 @@ tbody td:first-child{color:var(--white);font-weight:600;font-family:var(--f-mono
       <div class="page-eyebrow">AZAL · Live Flight Data</div>
       <div class="page-title">Flight Board</div>
     </div>
-    <div class="airport-badge">
-      <div class="airport-code">GYD</div>
-      <div class="airport-name">Heydar Aliyev Int'l · Baku</div>
+    <div style="display: flex; gap: 12px;">
+      <!-- Weather Widget -->
+      <div class="airport-badge" style="display:flex; align-items:center; gap:10px; padding: 8px 14px;">
+        <div id="weather-icon" style="font-size: 24px;">☁️</div>
+        <div style="text-align: left;">
+           <div class="airport-code" style="font-size: 18px;" id="weather-temp">--°C</div>
+           <div class="airport-name" id="weather-desc" style="text-transform: capitalize;">Baku</div>
+        </div>
+      </div>
+      <!-- Currency Widget -->
+      <div class="airport-badge" style="display:flex; align-items:center; gap:10px; padding: 8px 14px;">
+        <div style="font-size: 24px;">💱</div>
+        <div style="text-align: left;">
+           <div class="airport-code" style="font-size: 14px; letter-spacing: 0;">1 USD = <span id="curr-usd">--</span> AZN</div>
+           <div class="airport-name" style="font-size: 11px;">1 EUR = <span id="curr-eur">--</span> AZN</div>
+        </div>
+      </div>
+
+      <div class="airport-badge">
+        <div class="airport-code">GYD</div>
+        <div class="airport-name">Heydar Aliyev Int'l · Baku</div>
+      </div>
     </div>
   </div>
 
@@ -327,8 +346,33 @@ async function searchFlight() {
   }
 }
 
+// ── Load Weather & Currency ────────────────────────
+async function loadWidgets() {
+  try {
+    const wRes = await fetch('/api/weather?city=Baku');
+    if (wRes.ok) {
+      const wData = await wRes.json();
+      document.getElementById('weather-temp').textContent = wData.temp + '°C';
+      document.getElementById('weather-desc').textContent = wData.description;
+      if (wData.icon) {
+        document.getElementById('weather-icon').innerHTML = `<img src="https://openweathermap.org/img/wn/${wData.icon}.png" style="width:30px; height:30px; display:block;">`;
+      }
+    }
+  } catch(e) { console.error('Weather error:', e); }
+
+  try {
+    const cRes = await fetch('/api/currency');
+    if (cRes.ok) {
+      const cData = await cRes.json();
+      document.getElementById('curr-usd').textContent = cData.usd_to_azn;
+      document.getElementById('curr-eur').textContent = cData.eur_to_azn;
+    }
+  } catch(e) { console.error('Currency error:', e); }
+}
+
 // ── Init ───────────────────────────────────────────
 loadFlights();
+loadWidgets();
 </script>
 </body>
 </html>

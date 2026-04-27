@@ -1,110 +1,107 @@
-🌍 DirectX – Smart Travel & Payment Experience
+# AZCON DirectX Ecosystem
 
-DirectX is a smart travel assistant designed to simplify transportation, payments, and navigation for visitors in Baku.
-It combines routing, payment guidance, AI assistance, and a unified wallet experience into one platform.
+![AZCON Banner](https://img.shields.io/badge/Platform-AZCON-3AE2CE?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Beta_MVP-0B1D26?style=for-the-badge)
+![Node.js](https://img.shields.io/badge/Node.js-18.x-43853D?style=for-the-badge&logo=node.js)
+![Express](https://img.shields.io/badge/Express-Backend-000000?style=for-the-badge&logo=express)
 
-🚀 Problem
+**AZCON** is a unified, next-generation travel and transit ecosystem designed specifically for Azerbaijan (Baku). The **DirectX** platform serves as the central digital hub, offering a seamless, high-fidelity experience that connects flights, public transit, connectivity (eSIM), digital payments, and artificial intelligence into a single, intuitive interface.
 
-Tourists arriving in Baku face multiple challenges:
+## 🚀 Key Features
 
-❌ Public transport requires BakuKart (no direct foreign card support)
-❌ Payment systems are fragmented
-❌ No unified platform for transport, payments, and guidance
-❌ Lack of clear routing + cost visibility
-💡 Solution
+### 1. DirectX Dashboard
+A premium, scroll-triggered 3D landing page featuring smooth animations (powered by GSAP/ScrollTrigger) and a glassmorphism design. It introduces users to the core pillars of the AZCON ecosystem.
 
-DirectX provides a unified travel layer:
+### 2. Transit & Flights Board (`azal-flights.html`)
+Live, real-time flight tracking for Heydar Aliyev International Airport (GYD).
+- **Aviationstack Integration:** Real-time departures, arrivals, gates, and delays.
+- **Live Widgets:** Built-in real-time Weather (OpenWeatherMap) and Currency Exchange (ExchangeRate-API) widgets for travelers.
+- **Delay Intelligence:** Smart banners that detect delayed flights and offer contextual advice (e.g., lounge access, route updates).
 
-🗺️ Smart route planning (bus + metro + walking)
-💳 Payment guidance (what to use, where, and how)
-👛 Virtual travel wallet (for planning & simulation)
-🤖 AI-powered travel assistant
-📶 eSIM recommendations for connectivity
-🔥 Key Features
-🧭 Smart Routing
-Plan routes across Baku
-Combine bus, metro, and walking
-Show estimated time and cost
-💳 Payment Intelligence
-“All payments in one place” dashboard
-Metro, taxi, eSIM, and daily expenses
-Smart guidance instead of direct payment
-👛 BakuPass Wallet (Virtual)
-Add balance via promo/demo credits
-Estimate travel costs
-Simulate payments across services
-🤖 AI Travel Assistant
+### 3. DirectX AI Assistant (`directx-ai.html`)
+A powerful, multilingual AI assistant embedded deep into the ecosystem.
+- **Groq OSS Integration:** Utilizes high-speed, large-scale Open Source LLMs (e.g., `openai/gpt-oss-120b`).
+- **Hybrid Real-Time Research:** Connected to **You.com Research API** to fetch live, up-to-date information from the web before generating a response.
+- **Multilingual:** Automatically detects the user's language (Azerbaijani, English, Russian, etc.) and responds fluently in the same language with rich Markdown formatting.
 
-Powered by Gemini API
+### 4. Smart Services
+- **eSIM Connectivity:** Instant tourist and resident eSIM activation modules.
+- **Unified Wallet:** A centralized digital payment system for metro, retail, and platform services.
+- **Smart Route & Tracing:** Intelligent pathfinding across Baku's transport grid.
 
-Ask anything:
-“How do I use metro?”
-“What should I do after landing?”
-Context-aware suggestions
-Budget and route recommendations
-📍 Location Awareness
-Detect user context (e.g., airport, city center)
-Recommend best transport options
-Show nearest stops
-📶 eSIM Integration
-Suggest best data plans
-Redirect via affiliate providers (Airalo, Nomad)
-🧠 Innovation
+---
 
-“We don’t replace payment systems — we unify and simplify access to them.”
+## 🛠 Tech Stack
 
-Combines routing + wallet + AI + payment visibility
-Introduces a travel-first experience layer
-Built for scalability into real fintech integrations
-🏗️ Tech Stack
-Frontend: React / Next.js
-Backend: Node.js (Express)
-APIs Used:
-Gemini API (AI Assistant)
-OpenWeather API (context awareness)
-Waze (traffic context - simulated)
-AYNA API (bus stops data)
-Map: Leaflet / Mapbox
-📊 Data Strategy
-Real stop data from AYNA API
-Custom-built route dataset (hackathon MVP)
-Simulated ETA based on context (traffic, time)
-🧪 Demo Flow
-User opens app → “Arrived in Baku”
-Sees Smart Dashboard:
-Transport
-Payments
-Wallet
-Plans route (Airport → City)
-Gets:
-Route
-Cost
-Payment guidance
-Uses AI assistant for help
-Simulates payment / redirect
-💰 Monetization
-eSIM affiliate commissions
-Taxi referral partnerships
-Premium AI travel assistant
-Future: integrated wallet & payments
-⚠️ Disclaimer
+- **Frontend:** HTML5, Vanilla JavaScript, CSS3 (Custom Glassmorphism Design System)
+- **Animations:** GSAP (GreenSock) & ScrollTrigger
+- **Backend:** Node.js, Express.js
+- **API Integrations:** 
+  - Groq API (LLM inference)
+  - You.com API (Web Search & RAG)
+  - Aviationstack API (Live Flights)
+  - OpenWeatherMap API (Weather)
+  - ExchangeRate-API (Currency)
+- **Deployment:** Pre-configured for serverless deployment on Vercel (`vercel.json`).
 
-This project is a hackathon MVP:
+---
 
-Payments are simulated
-Wallet is virtual
-Some data is approximated
+## ⚙️ Installation & Setup
 
-Future versions will include:
+### 1. Clone the repository
+```bash
+git clone https://github.com/your-username/azcon-directx.git
+cd azcon-directx
+```
 
-Real payment integrations
-Banking partnerships
-Live transport APIs
-🌟 Vision
+### 2. Install Dependencies
+Ensure you have Node.js installed, then run:
+```bash
+npm install express cors axios dotenv
+```
 
-To become the default travel companion for visitors in Baku,
-and later expand to other cities.
+### 3. Environment Variables
+Create a `.env` file inside the `backend/` directory with the following API keys:
+```env
+# AI Models & Search
+GROQ_API_KEY=your_groq_key_here
+YOU_API_KEY=your_you_dot_com_key_here
 
-👥 Team
+# Transit & Utilities
+AVIATIONSTACK_API_KEY=your_aviationstack_key_here
+EXCHANGERATE_API_KEY=your_exchange_rate_key_here
+OPENWEATHERMAP_API_KEY=your_openweathermap_key_here
+```
 
-Built for AzCon Hackathon
+### 4. Run the Development Server
+```bash
+npm start
+```
+The server will start on `http://localhost:3000`. Navigate to the URL in your browser to experience the DirectX Dashboard.
+
+---
+
+## 📂 Project Structure
+
+```text
+├── backend/
+│   ├── routes/
+│   │   ├── ai.js           # Groq & You.com hybrid logic
+│   │   ├── flights.js      # Aviationstack live data logic
+│   │   ├── weather.js      # OpenWeatherMap logic
+│   │   └── currency.js     # ExchangeRate API logic
+│   ├── server.js           # Express App Entry Point
+│   └── .env                # Secret API Keys
+├── index.css               # Global Styles & Tokens
+├── directx-dashboard.html  # 3D Landing Page
+├── azcon-one.html          # Ecosystem Hub
+├── azal-flights.html       # Transit & Live Flights Dashboard
+├── directx-ai.html         # Multilingual AI Assistant UI
+├── vercel.json             # Serverless deployment config
+└── README.md
+```
+
+---
+
+## 🛡 License
+© 2026 AZCON. All rights reserved. Proprietary and confidential.
